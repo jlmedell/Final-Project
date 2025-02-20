@@ -22,6 +22,7 @@ class Menu extends Phaser.Scene {
         this.load.image('pinkcat', './assets/pinkcat.png')
         this.load.image('cheese', './assets/cheese.png')
         this.load.image('tilesetImage', 'tileset.png')
+        this.load.tilemapTiledJSON('map', 'tilemap.json')
 
         this.load.audio('sfx-hurt', './assets/hitHurt.wav')
         this.load.audio('sfx-checkpoint', './assets/powerUp.wav')
@@ -29,7 +30,7 @@ class Menu extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor('#000000')
         let menuConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Papyrus',
             fontSize: '56px',
             backgroundColor: '#FF00FF',
             color: '#0000FF',

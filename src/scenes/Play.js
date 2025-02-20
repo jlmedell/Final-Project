@@ -8,9 +8,18 @@ class Play extends Phaser.Scene {
         this.RATX = game.config.width/2 //rat spawn point
         this.RATY = game.config.height/2
     }
+    preload() {
+        this.load.image('tilesetImage', 'tileset.png')
+        this.load.tilemapTiledJSON('tilemapJSON', 'tilemap.json')
+    }
     create() {
         score = 0
         lives = 3
+
+        //tilemap
+        const map = this.add.tilemap('tilemapJSON')
+        const tileset = map.addTilesetImage('tileset', 'tilesetImage') //tileset name from json file
+        const bgLayer = map.createLayer('Tile Layer 1', tileset, 0, 0) //layer name in Tiled
 
         //add rat and cats
         this.rat = this.physics.add.sprite(this.RATX, this.RATY, 'rat', 0).setScale(0.2)

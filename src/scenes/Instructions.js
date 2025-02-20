@@ -20,7 +20,7 @@ class Instructions extends Phaser.Scene {
         this.add.text(game.config.width/2, game.config.height/4 - borderUISize, 'INSTRUCTIONS', menuConfig).setOrigin(0.5)
         menuConfig.backgroundColor = '#0000FF'
         menuConfig.color = '#000'
-        this.add.text(game.config.width/2, game.config.height/2, 'Use arrow keys to move through maze', menuConfig).setOrigin(0.5)
+        this.add.text(game.config.width/2, game.config.height/2, 'Move using arrow keys', menuConfig).setOrigin(0.5)
         this.add.text(game.config.width/2, game.config.height/2 + borderUISize * 2, 'Collect cheese for points', menuConfig).setOrigin(0.5)
         this.add.text(game.config.width/2, game.config.height/2 + borderUISize * 4, 'Avoid contact with cats', menuConfig).setOrigin(0.5)
         menuConfig.backgroundColor = '#FF0000'

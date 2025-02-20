@@ -5,8 +5,8 @@
 
 let config = {
     type: Phaser.AUTO,
-    width: 640,
-    height: 480,
+    width: 464,
+    height: 560,
     render: {
         pixelArt: true
     },
