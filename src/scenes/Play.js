@@ -6,23 +6,28 @@ class Play extends Phaser.Scene {
     init() {
         this.VEL = 100  //rat velocity constant
         this.RATX = game.config.width/2 //rat spawn point
-        this.RATY = game.config.height/2
+        this.RATY = game.config.height/2 - 10
     }
     preload() {
-        this.load.image('tilesetImage', 'tileset.png')
-        this.load.tilemapTiledJSON('tilemapJSON', 'tilemap.json')
+        //this.load.image('tilesetImage', 'tileset.png')
+        //this.load.tilemapTiledJSON('tilemapJSON', 'tilemap.json')
+        this.load.image("tileset","./assets/tileset.png");
+        this.load.tilemapTiledJSON("map","./assets/tilemap.json");
     }
     create() {
         score = 0
         lives = 3
 
         //tilemap
-        const map = this.add.tilemap('tilemapJSON')
-        const tileset = map.addTilesetImage('tileset', 'tilesetImage') //tileset name from json file
-        const bgLayer = map.createLayer('Tile Layer 1', tileset, 0, 0) //layer name in Tiled
+        //const map = this.add.tilemap('tilemapJSON')
+        //const tileset = map.addTilesetImage('tileset', 'tilesetImage') //tileset name from json file
+        //const bgLayer = map.createLayer('Tile Layer 1', tileset, 0, 0) //layer name in Tiled
+        this.map = this.make.tilemap({key:"map"});
+        const tileset = this.map.addTilesetImage("tileset");
+        const layer = this.map.createLayer("Tile Layer 1",[tileset]);
 
         //add rat and cats
-        this.rat = this.physics.add.sprite(this.RATX, this.RATY, 'rat', 0).setScale(0.2)
+        this.rat = this.physics.add.sprite(this.RATX, this.RATY, 'rat', 0).setScale(0.07)
         this.rat.body.setCollideWorldBounds(true)
 
         this.cats = this.physics.add.group({
@@ -30,10 +35,10 @@ class Play extends Phaser.Scene {
             immovable: true 
         })
 
-        let greencat = this.cats.create(80, 20, 'greencat').setScale(0.2)
-        let bluecat = this.cats.create(160, 20, 'bluecat').setScale(0.2)
-        let tancat = this.cats.create(240, 20, 'tancat').setScale(0.2)
-        let pinkcat = this.cats.create(320, 20, 'pinkcat').setScale(0.2)
+        let greencat = this.cats.create(32, 512, 'greencat').setScale(0.07)
+        let bluecat = this.cats.create(32, 80, 'bluecat').setScale(0.07)
+        let tancat = this.cats.create(432, 80, 'tancat').setScale(0.07)
+        let pinkcat = this.cats.create(432, 512, 'pinkcat').setScale(0.07)
 
         //rat collides with cat
         this.physics.add.overlap(
@@ -51,9 +56,24 @@ class Play extends Phaser.Scene {
 
         // input
         this.cursors = this.input.keyboard.createCursorKeys()
+
+        //score and lives display
+        let scoreConfig = {
+            fontFamily: 'Courier',
+            fontSize: '20px',
+            backgroundColor: '#F3B141',
+            color: '#843605',
+            align: 'right',
+            padding: {
+                top: 5,
+                bottom: 5,
+            }
+        }
+        this.livesLeft = this.add.text(10, 10, lives, scoreConfig)
+        this.scoreLeft = this.add.text(200, 10, score, scoreConfig)
     }
 
-    //
+    //lose a life upon touching a cat
     catCollision(player, arrow) {
         this.sound.play('sfx-hurt')
         lives = lives - 1 //lose 1 life upon touching cat
@@ -78,6 +98,10 @@ class Play extends Phaser.Scene {
         }
         this.direction.normalize()
         this.rat.setVelocity(this.VEL * this.direction.x, this.VEL * this.direction.y)
+
+        //update score and lives display
+        this.scoreLeft.text = "Score: " + score
+        this.livesLeft.text = "Lives Left: " + lives
 
         //game over
         if (lives <= 0) {
