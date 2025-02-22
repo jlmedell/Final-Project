@@ -24,7 +24,62 @@ class Play extends Phaser.Scene {
         //const bgLayer = map.createLayer('Tile Layer 1', tileset, 0, 0) //layer name in Tiled
         this.map = this.make.tilemap({key:"map"});
         const tileset = this.map.addTilesetImage("tileset");
-        const layer = this.map.createLayer("Tile Layer 1",[tileset]);
+        const layer = this.map.createLayer("Tile Layer 1",[tileset])
+        layer.setCollisionByExclusion(-1,true)
+
+        //add cheese
+        this.cheese = this.physics.add.group({
+            allowGravity: false, 
+            immovable: true
+        })
+        for (let i = 32; i < 16*28; i = i + 16){ //26 cheeses
+            this.cheese.create(i, 80, 'cheese').setScale(0.01)
+        }
+        for (let i = 32; i < 16*28; i = i + 16){ //26 cheeses
+            this.cheese.create(i, 512, 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*14); i < 16*25; i = i + 16){ //9 cheeses
+            this.cheese.create(i, 80 + (16 * 12), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*12); i < 16*25; i = i + 16){ //11 cheeses
+            this.cheese.create(i, 80 + (16 * 15), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*5); i < 16*31; i = i + 16){ //24 cheeses
+            this.cheese.create(32, i, 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*5); i < 16*31; i = i + 16){ //24 cheeses
+            this.cheese.create(432, i, 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*10); i < 16*21; i = i + 16){ //9 cheeses
+            this.cheese.create(32 + (6*16), i, 'cheese').setScale(0.01)
+        } 
+        for (let i = 32+(16*10); i < 16*21; i = i + 16){ //9 cheeses
+            this.cheese.create(32 + (3*16), i, 'cheese').setScale(0.01)
+        } 
+        for (let i = 32+(16*4); i < 16*25; i = i + 16){ //19 cheeses
+            this.cheese.create(i, 80 + (16 * 3), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*4); i < 16*25; i = i + 16){ //19 cheeses
+            this.cheese.create(i, 80 + (16 * 21), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*4); i < 16*14; i = i + 16){ //8 cheeses
+            this.cheese.create(i, 80 + (16 * 24), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*19); i < 16*24; i = i + 16){ //3 cheeses
+            this.cheese.create(i, 80 + (16 * 24), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*17); i < 16*24; i = i + 16){ //5 cheeses
+            this.cheese.create(i, 80 + (16 * 6), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*9); i < 16*14; i = i + 16){ //3 cheeses
+            this.cheese.create(i, 80 + (16 * 9), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*12); i < 16*22; i = i + 16){ //8 cheeses
+            this.cheese.create(i, 80 + (16 * 18), 'cheese').setScale(0.01)
+        }
+        this.cheeses = 203
+
+
 
         //add rat and cats
         this.rat = this.physics.add.sprite(this.RATX, this.RATY, 'rat', 0).setScale(0.07)
@@ -35,8 +90,8 @@ class Play extends Phaser.Scene {
             immovable: true 
         })
 
-        let greencat = this.cats.create(32, 512, 'greencat').setScale(0.07)
-        let bluecat = this.cats.create(32, 80, 'bluecat').setScale(0.07)
+        let greencat = this.cats.create(32, 512, 'greencat').setScale(0.07) //y = 512
+        let bluecat = this.cats.create(32, 80, 'bluecat').setScale(0.07) //y = 80
         let tancat = this.cats.create(432, 80, 'tancat').setScale(0.07)
         let pinkcat = this.cats.create(432, 512, 'pinkcat').setScale(0.07)
 
@@ -49,10 +104,14 @@ class Play extends Phaser.Scene {
             this
         )
 
-        //this.greencat = this.physics.add.sprite(80, 20, 'greencat', 0).setScale(0.2)
-        //this.bluecat = this.physics.add.sprite(160, 20, 'bluecat', 0).setScale(0.2)
-        //this.tancat = this.physics.add.sprite(240, 20, 'tancat', 0).setScale(0.2)
-        //this.pinkcat = this.physics.add.sprite(320, 20, 'pinkcat', 0).setScale(0.2)
+        //rat collides with cheese
+        this.physics.add.overlap(
+            this.rat,
+            this.cheese,
+            this.cheeseCollision,
+            null,
+            this
+        )
 
         // input
         this.cursors = this.input.keyboard.createCursorKeys()
@@ -74,12 +133,20 @@ class Play extends Phaser.Scene {
     }
 
     //lose a life upon touching a cat
-    catCollision(player, arrow) {
+    catCollision(player, cat) {
         this.sound.play('sfx-hurt')
         lives = lives - 1 //lose 1 life upon touching cat
         this.rat.x = this.RATX //return to spawn
         this.rat.y = this.RATY
     }
+
+
+    cheeseCollision(player, cheese) {
+        cheese.destroy() //eat cheese
+        this.cheeses = this.cheeses - 1 
+        score = score + 1 //increase score
+    }
+
 
     update() {
         //rat movement
@@ -103,9 +170,62 @@ class Play extends Phaser.Scene {
         this.scoreLeft.text = "Score: " + score
         this.livesLeft.text = "Lives Left: " + lives
 
+        if (this.cheeses === 0) {
+            this.respawnCheese()
+        }
+
         //game over
         if (lives <= 0) {
             this.scene.start('creditsScene')
         }
+    }
+
+    respawnCheese() {
+        for (let i = 32; i < 16*28; i = i + 16){ //26 cheeses
+            this.cheese.create(i, 80, 'cheese').setScale(0.01)
+        }
+        for (let i = 32; i < 16*28; i = i + 16){ //26 cheeses
+            this.cheese.create(i, 512, 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*14); i < 16*25; i = i + 16){ //9 cheeses
+            this.cheese.create(i, 80 + (16 * 12), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*12); i < 16*25; i = i + 16){ //11 cheeses
+            this.cheese.create(i, 80 + (16 * 15), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*5); i < 16*31; i = i + 16){ //24 cheeses
+            this.cheese.create(32, i, 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*5); i < 16*31; i = i + 16){ //24 cheeses
+            this.cheese.create(432, i, 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*10); i < 16*21; i = i + 16){ //9 cheeses
+            this.cheese.create(32 + (6*16), i, 'cheese').setScale(0.01)
+        } 
+        for (let i = 32+(16*10); i < 16*21; i = i + 16){ //9 cheeses
+            this.cheese.create(32 + (3*16), i, 'cheese').setScale(0.01)
+        } 
+        for (let i = 32+(16*4); i < 16*25; i = i + 16){ //19 cheeses
+            this.cheese.create(i, 80 + (16 * 3), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*4); i < 16*25; i = i + 16){ //19 cheeses
+            this.cheese.create(i, 80 + (16 * 21), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*4); i < 16*14; i = i + 16){ //8 cheeses
+            this.cheese.create(i, 80 + (16 * 24), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*19); i < 16*24; i = i + 16){ //3 cheeses
+            this.cheese.create(i, 80 + (16 * 24), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*17); i < 16*24; i = i + 16){ //5 cheeses
+            this.cheese.create(i, 80 + (16 * 6), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*9); i < 16*14; i = i + 16){ //3 cheeses
+            this.cheese.create(i, 80 + (16 * 9), 'cheese').setScale(0.01)
+        }
+        for (let i = 32+(16*12); i < 16*22; i = i + 16){ //8 cheeses
+            this.cheese.create(i, 80 + (16 * 18), 'cheese').setScale(0.01)
+        }
+        this.cheeses = 203
     }
 }
