@@ -23,9 +23,12 @@ class Play extends Phaser.Scene {
         //const tileset = map.addTilesetImage('tileset', 'tilesetImage') //tileset name from json file
         //const bgLayer = map.createLayer('Tile Layer 1', tileset, 0, 0) //layer name in Tiled
         this.map = this.make.tilemap({key:"map"});
-        const tileset = this.map.addTilesetImage("tileset");
+        const tileset = this.map.addTilesetImage("tileset")
         const layer = this.map.createLayer("Tile Layer 1",[tileset])
-        layer.setCollisionByExclusion(-1,true)
+        layer.setCollisionByProperty({ collides: true })
+        //this.layer.setCollisionByProperty({ collides: true })
+        //layer.setCollisionByExclusion(-1,true)
+        //layer.setCollisionByExclusion(-1,true)
 
         //add cheese
         this.cheese = this.physics.add.group({
@@ -84,6 +87,8 @@ class Play extends Phaser.Scene {
         //add rat and cats
         this.rat = this.physics.add.sprite(this.RATX, this.RATY, 'rat', 0).setScale(0.07)
         this.rat.body.setCollideWorldBounds(true)
+        //this.rat.add.collider(this.rat, layer)
+        this.physics.add.collider(this.rat, layer)
 
         this.cats = this.physics.add.group({
             allowGravity: false, 
@@ -170,6 +175,7 @@ class Play extends Phaser.Scene {
         this.scoreLeft.text = "Score: " + score
         this.livesLeft.text = "Lives Left: " + lives
 
+        //respawn cheese when none left
         if (this.cheeses === 0) {
             this.respawnCheese()
         }
