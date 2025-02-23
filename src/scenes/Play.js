@@ -9,8 +9,6 @@ class Play extends Phaser.Scene {
         this.RATY = game.config.height/2 - 10
     }
     preload() {
-        //this.load.image('tilesetImage', 'tileset.png')
-        //this.load.tilemapTiledJSON('tilemapJSON', 'tilemap.json')
         this.load.image("tileset","./assets/tileset.png");
         this.load.tilemapTiledJSON("map","./assets/tilemap.json");
     }
@@ -19,16 +17,10 @@ class Play extends Phaser.Scene {
         lives = 3
 
         //tilemap
-        //const map = this.add.tilemap('tilemapJSON')
-        //const tileset = map.addTilesetImage('tileset', 'tilesetImage') //tileset name from json file
-        //const bgLayer = map.createLayer('Tile Layer 1', tileset, 0, 0) //layer name in Tiled
         this.map = this.make.tilemap({key:"map"});
         const tileset = this.map.addTilesetImage("tileset")
         const layer = this.map.createLayer("Tile Layer 1",[tileset])
         layer.setCollisionByProperty({ collides: true })
-        //this.layer.setCollisionByProperty({ collides: true })
-        //layer.setCollisionByExclusion(-1,true)
-        //layer.setCollisionByExclusion(-1,true)
 
         //add cheese
         this.cheese = this.physics.add.group({
@@ -94,11 +86,29 @@ class Play extends Phaser.Scene {
             allowGravity: false, 
             immovable: true 
         })
-
         let greencat = this.cats.create(32, 512, 'greencat').setScale(0.07) //y = 512
         let bluecat = this.cats.create(32, 80, 'bluecat').setScale(0.07) //y = 80
         let tancat = this.cats.create(432, 80, 'tancat').setScale(0.07)
         let pinkcat = this.cats.create(432, 512, 'pinkcat').setScale(0.07)
+
+        //cat movement
+        this.cats.getChildren().forEach(cat => {
+            let direction = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
+            this.moveCat(cat, direction)
+        })
+        this.time.addEvent({
+            delay: 15000, //15 seconds
+            callback: () => {
+                this.cats.getChildren().forEach(cat => {
+                    this.newDirection(cat);
+                });
+            },
+            loop: true
+        })
+        //cat hits wall
+        this.physics.add.collider(this.cats, this.map.getLayer("Tile Layer 1").tilemapLayer, (cat) => {
+            this.newDirection(cat)
+        })
 
         //rat collides with cat
         this.physics.add.overlap(
@@ -145,11 +155,43 @@ class Play extends Phaser.Scene {
         this.rat.y = this.RATY
     }
 
-
+    //gain point after eating cheese
     cheeseCollision(player, cheese) {
         cheese.destroy() //eat cheese
         this.cheeses = this.cheeses - 1 
         score = score + 1 //increase score
+    }
+
+    //cat movement
+    moveCat(cat, direction) {
+        switch (direction) {
+            case 0: //0=up
+                cat.setVelocity(0, -30);
+                cat.direction = 0;
+                break;
+            case 1: //1=down
+                cat.setVelocity(0, 30);
+                cat.direction = 1;
+                break;
+            case 2: //2=left
+                cat.setVelocity(-30, 0);
+                cat.direction = 2;
+                break;
+            case 3: //3=right
+                cat.setVelocity(30, 0);
+                cat.direction = 3;
+                break;
+        }
+    }
+
+    //change cat movement direction
+    newDirection(cat) {
+        let newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
+        while (newDirection === cat.direction) {
+            newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
+        }
+    
+        this.moveCat(cat, newDirection);
     }
 
 
@@ -179,6 +221,14 @@ class Play extends Phaser.Scene {
         if (this.cheeses === 0) {
             this.respawnCheese()
         }
+
+        //at certain elevations, change cat movement direction
+        //this.cats.getChildren().forEach(cat => {
+            //if (cat.y === 32 + (16*3) || cat.y === 32 + (16*6) || cat.y === 32 + (16*9) || cat.y === 32 + (16*12) || cat.y === 32 + (16*15) || cat.y === 32 + (16*18) || cat.y === 32 + (16*21) || cat.y === 32 + (16*24) || cat.y === 32 + (16*27)) { 
+                //let newDirection = Phaser.Math.Between(2, 3) //0=up, 1=down, 2=left, 3=right
+            //this.moveCat(cat, newDirection)
+            //}
+        //})
 
         //game over
         if (lives <= 0) {
@@ -233,5 +283,15 @@ class Play extends Phaser.Scene {
             this.cheese.create(i, 80 + (16 * 18), 'cheese').setScale(0.01)
         }
         this.cheeses = 203
+    }
+
+    //change cat movement direction
+    newDirection(cat) {
+        let newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
+        while (newDirection === cat.direction) {
+            newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
+        }
+    
+        this.moveCat(cat, newDirection)
     }
 }
