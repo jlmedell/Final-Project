@@ -93,11 +93,11 @@ class Play extends Phaser.Scene {
 
         //cat movement
         this.cats.getChildren().forEach(cat => {
-            let direction = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
+            let direction = Phaser.Math.Between(0, 1) //0=up, 1=down, 2=left, 3=right
             this.moveCat(cat, direction)
         })
         this.time.addEvent({
-            delay: 15000, //15 seconds
+            delay: 15000, //every 15 seconds
             callback: () => {
                 this.cats.getChildren().forEach(cat => {
                     this.newDirection(cat);
@@ -105,6 +105,7 @@ class Play extends Phaser.Scene {
             },
             loop: true
         })
+
         //cat hits wall
         this.physics.add.collider(this.cats, this.map.getLayer("Tile Layer 1").tilemapLayer, (cat) => {
             this.newDirection(cat)
@@ -128,7 +129,7 @@ class Play extends Phaser.Scene {
             this
         )
 
-        // input
+        //input
         this.cursors = this.input.keyboard.createCursorKeys()
 
         //score and lives display
@@ -145,6 +146,26 @@ class Play extends Phaser.Scene {
         }
         this.livesLeft = this.add.text(10, 10, lives, scoreConfig)
         this.scoreLeft = this.add.text(200, 10, score, scoreConfig)
+
+        //after 1.5 seconds, turn blue cat
+        this.time.delayedCall(1500, () => {
+            this.moveCat(bluecat, 3) //3=right
+        }, [], this)
+
+        //after 6 seconds, turn pink cat
+        this.time.delayedCall(6000, () => {
+            this.moveCat(pinkcat, 2) //2=left
+        }, [], this)
+
+        //after 4.5 seconds, turn tan cat
+        this.time.delayedCall(4500, () => {
+            this.moveCat(tancat, 2) //2=left
+        }, [], this)
+
+        //after 12 seconds, turn green cat
+        this.time.delayedCall(12000, () => {
+            this.moveCat(greencat, 3) //3=right
+        }, [], this)
     }
 
     //lose a life upon touching a cat
@@ -166,19 +187,19 @@ class Play extends Phaser.Scene {
     moveCat(cat, direction) {
         switch (direction) {
             case 0: //0=up
-                cat.setVelocity(0, -30);
+                cat.setVelocity(0, -32);
                 cat.direction = 0;
                 break;
             case 1: //1=down
-                cat.setVelocity(0, 30);
+                cat.setVelocity(0, 32);
                 cat.direction = 1;
                 break;
             case 2: //2=left
-                cat.setVelocity(-30, 0);
+                cat.setVelocity(-32, 0);
                 cat.direction = 2;
                 break;
             case 3: //3=right
-                cat.setVelocity(30, 0);
+                cat.setVelocity(32, 0);
                 cat.direction = 3;
                 break;
         }
@@ -222,13 +243,20 @@ class Play extends Phaser.Scene {
             this.respawnCheese()
         }
 
-        //at certain elevations, change cat movement direction
-        //this.cats.getChildren().forEach(cat => {
-            //if (cat.y === 32 + (16*3) || cat.y === 32 + (16*6) || cat.y === 32 + (16*9) || cat.y === 32 + (16*12) || cat.y === 32 + (16*15) || cat.y === 32 + (16*18) || cat.y === 32 + (16*21) || cat.y === 32 + (16*24) || cat.y === 32 + (16*27)) { 
-                //let newDirection = Phaser.Math.Between(2, 3) //0=up, 1=down, 2=left, 3=right
-            //this.moveCat(cat, newDirection)
-            //}
-        //})
+        //at certain positions, change cat movement direction
+        this.cats.getChildren().forEach(cat => {
+            if (!cat.prevy) {
+                cat.prevy = cat.y //previous y-coordinate
+            }
+            if ((cat.y) % 48 === 0 && Math.floor(cat.prevy) % 48 !== 32) { // y = 80 + multiple of 48 (48 pixels between walls)
+                if (cat.x < this.game.config.width/2) {
+                    this.moveCat(cat, 3) //3=right
+                } else {
+                    this.moveCat(cat, 2) //2=left
+                }
+            }
+            cat.prevy = cat.y
+        })
 
         //game over
         if (lives <= 0) {
