@@ -5,7 +5,7 @@ class Instructions extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor('#000000')
         let menuConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Arial',
             fontSize: '28px',
             backgroundColor: '#FF00FF',
             color: '#0000FF',

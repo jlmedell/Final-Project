@@ -93,15 +93,17 @@ class Play extends Phaser.Scene {
 
         //cat movement
         this.cats.getChildren().forEach(cat => {
-            let direction = Phaser.Math.Between(0, 1) //0=up, 1=down, 2=left, 3=right
-            this.moveCat(cat, direction)
+            this.moveCat(bluecat, 1) //1=down
+            this.moveCat(tancat, 1) //1=down
+            this.moveCat(greencat, 0) //0=up
+            this.moveCat(pinkcat, 0) //0=up
         })
         this.time.addEvent({
-            delay: 15000, //every 15 seconds
+            delay: 30000, //every 30 seconds
             callback: () => {
                 this.cats.getChildren().forEach(cat => {
                     this.newDirection(cat);
-                });
+                })
             },
             loop: true
         })
@@ -185,34 +187,36 @@ class Play extends Phaser.Scene {
 
     //cat movement
     moveCat(cat, direction) {
-        switch (direction) {
-            case 0: //0=up
+            //0=up
+            if (direction == 0) {
                 cat.setVelocity(0, -32);
-                cat.direction = 0;
-                break;
-            case 1: //1=down
-                cat.setVelocity(0, 32);
-                cat.direction = 1;
-                break;
-            case 2: //2=left
-                cat.setVelocity(-32, 0);
-                cat.direction = 2;
-                break;
-            case 3: //3=right
-                cat.setVelocity(32, 0);
-                cat.direction = 3;
-                break;
-        }
+                cat.direction = 0
+            }
+            //1=down
+            if (direction == 1) {
+                cat.setVelocity(0, 32)
+                cat.direction = 1
+            }
+            //2=left
+            if (direction == 2) {
+                cat.setVelocity(-32, 0)
+                cat.direction = 2
+            }
+            //3=right
+            if (direction == 3) {
+                cat.setVelocity(32, 0)
+                cat.direction = 3
+            }
     }
 
     //change cat movement direction
     newDirection(cat) {
         let newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
-        while (newDirection === cat.direction) {
+        while (newDirection == cat.direction) {
             newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
         }
     
-        this.moveCat(cat, newDirection);
+        this.moveCat(cat, newDirection)
     }
 
 
@@ -239,7 +243,7 @@ class Play extends Phaser.Scene {
         this.livesLeft.text = "Lives Left: " + lives
 
         //respawn cheese when none left
-        if (this.cheeses === 0) {
+        if (this.cheeses == 0) {
             this.respawnCheese()
         }
 
@@ -248,7 +252,7 @@ class Play extends Phaser.Scene {
             if (!cat.prevy) {
                 cat.prevy = cat.y //previous y-coordinate
             }
-            if ((cat.y) % 48 === 0 && Math.floor(cat.prevy) % 48 !== 32) { // y = 80 + multiple of 48 (48 pixels between walls)
+            if ((cat.y) % 48 == 0 && Math.floor(cat.prevy) % 48 != 32) { // y = 80 + multiple of 48 (48 pixels between walls)
                 if (cat.x < this.game.config.width/2) {
                     this.moveCat(cat, 3) //3=right
                 } else {
@@ -316,7 +320,7 @@ class Play extends Phaser.Scene {
     //change cat movement direction
     newDirection(cat) {
         let newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
-        while (newDirection === cat.direction) {
+        while (newDirection == cat.direction) {
             newDirection = Phaser.Math.Between(0, 3) //0=up, 1=down, 2=left, 3=right
         }
     

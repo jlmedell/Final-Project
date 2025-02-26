@@ -42,7 +42,7 @@ class Menu extends Phaser.Scene {
             fixedWidth: 0
         }
 
-        //text box
+        //text boxes
         this.add.text(game.config.width/2, game.config.height/2 - borderUISize * 3, 'PAK-RAT', menuConfig).setOrigin(0.5)
         menuConfig.color = '#000'
         menuConfig.backgroundColor = '#FF0000'
