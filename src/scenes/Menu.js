@@ -7,8 +7,8 @@ class Menu extends Phaser.Scene {
         let loadingBar = this.add.graphics();
         this.load.on('progress', (value) => {
             loadingBar.clear()
-            loadingBar.fillStyle(0xFF0000, 1)
-            loadingBar.fillRect(game.config.width/2, game.config.height/2, (game.config.width/2) * value, 10)
+            loadingBar.fillStyle(0x0000FF, 1)
+            loadingBar.fillRect(this.game.config.width/2, game.config.height/2, (game.config.width/2) * value, 10)
         })
         this.load.on('complete', () => {
             loadingBar.destroy()
@@ -28,12 +28,12 @@ class Menu extends Phaser.Scene {
         this.load.audio('sfx-checkpoint', './assets/powerUp.wav')
     }
     create() {
-        this.cameras.main.setBackgroundColor('#000000')
+        this.cameras.main.setBackgroundColor('#FFFF00')
         let menuConfig = {
-            fontFamily: 'Papyrus',
+            fontFamily: 'Arial',
             fontSize: '56px',
-            backgroundColor: '#FF00FF',
-            color: '#0000FF',
+            fontStyle: 'bold',
+            color: '#FF0000',
             align: 'right',
             padding: {
                 top: 5,

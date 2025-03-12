@@ -9,12 +9,25 @@ class Play extends Phaser.Scene {
         this.RATY = game.config.height/2 - 10
     }
     preload() {
+        //loading bar
+        let loadingBar = this.add.graphics();
+        this.load.on('progress', (value) => {
+            loadingBar.clear()
+            loadingBar.fillStyle(0x0000FF, 1)
+            //loadingBar.fillRect(game.config.width/2, game.config.height/2, (game.config.width/2) * value, 10)
+            loadingBar.fillRect(game.config.width/2 - 50, game.config.height/2, (game.config.width/2) * value, 10)
+        })
+        this.load.on('complete', () => {
+            loadingBar.destroy()
+        })
+
         this.load.image("tileset","./assets/tileset.png");
         this.load.tilemapTiledJSON("map","./assets/tilemap.json");
     }
     create() {
         score = 0
         lives = 3
+        this.animation = 0
 
         //tilemap
         this.map = this.make.tilemap({key:"map"});
@@ -136,10 +149,10 @@ class Play extends Phaser.Scene {
 
         //score and lives display
         let scoreConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Arial',
             fontSize: '20px',
-            backgroundColor: '#F3B141',
-            color: '#843605',
+            backgroundColor: '#FFFF00',
+            color: '#000000',
             align: 'right',
             padding: {
                 top: 5,
@@ -147,35 +160,53 @@ class Play extends Phaser.Scene {
             }
         }
         this.livesLeft = this.add.text(10, 10, lives, scoreConfig)
-        this.scoreLeft = this.add.text(200, 10, score, scoreConfig)
+        this.scoreLeft = this.add.text(game.config.width - 200, 10, score, scoreConfig)
 
-        //after 1.5 seconds, turn blue cat
-        this.time.delayedCall(1500, () => {
-            this.moveCat(bluecat, 3) //3=right
+        //after 1 second, turn blue cat
+        this.time.delayedCall(1000, () => { //1500
+            //this.moveCat(bluecat, 3) //3=right
         }, [], this)
 
-        //after 6 seconds, turn pink cat
-        this.time.delayedCall(6000, () => {
-            this.moveCat(pinkcat, 2) //2=left
+        //after 4 seconds, turn pink cat
+        this.time.delayedCall(4000, () => { //6000
+            //this.moveCat(pinkcat, 2) //2=left
         }, [], this)
 
-        //after 4.5 seconds, turn tan cat
-        this.time.delayedCall(4500, () => {
-            this.moveCat(tancat, 2) //2=left
+        //after 3 seconds, turn tan cat
+        this.time.delayedCall(3000, () => { //4500
+            //this.moveCat(tancat, 2) //2=left
         }, [], this)
 
-        //after 12 seconds, turn green cat
-        this.time.delayedCall(12000, () => {
-            this.moveCat(greencat, 3) //3=right
+        //after 8 seconds, turn green cat
+        this.time.delayedCall(8000, () => { //12000
+            //this.moveCat(greencat, 3) //3=right
         }, [], this)
     }
 
     //lose a life upon touching a cat
     catCollision(player, cat) {
-        this.sound.play('sfx-hurt')
-        lives = lives - 1 //lose 1 life upon touching cat
-        this.rat.x = this.RATX //return to spawn
-        this.rat.y = this.RATY
+        if (this.animation == 0){
+            this.sound.play('sfx-hurt')
+
+            this.animation = 1
+            //tween respawn animation
+            let respawnTween = this.tweens.add({
+                targets: this.rat,
+                alpha: { from: 0, to: 1 },
+                scale: { from: 0.07, to: 0.01 },
+                angle: { from: 0, to: 360 },
+                ease: 'Linear',
+                duration: 1000, //1 second
+                onComplete: () => {
+                    this.rat.x = this.RATX //return to spawn
+                    this.rat.y = this.RATY
+                    this.rat.setAngle(0)
+                    this.rat.setScale(0.07)
+                    this.animation = 0
+                    lives = lives - 1 //lose 1 life upon touching cat
+                }
+            })
+        }
     }
 
     //gain point after eating cheese
@@ -189,22 +220,22 @@ class Play extends Phaser.Scene {
     moveCat(cat, direction) {
             //0=up
             if (direction == 0) {
-                cat.setVelocity(0, -32);
+                cat.setVelocity(0, -48); //-32
                 cat.direction = 0
             }
             //1=down
             if (direction == 1) {
-                cat.setVelocity(0, 32)
+                cat.setVelocity(0, 48)
                 cat.direction = 1
             }
             //2=left
             if (direction == 2) {
-                cat.setVelocity(-32, 0)
+                cat.setVelocity(-48, 0)
                 cat.direction = 2
             }
             //3=right
             if (direction == 3) {
-                cat.setVelocity(32, 0)
+                cat.setVelocity(48, 0)
                 cat.direction = 3
             }
     }
@@ -223,16 +254,16 @@ class Play extends Phaser.Scene {
     update() {
         //rat movement
         this.direction = new Phaser.Math.Vector2(0)
-        if(this.cursors.left.isDown) {
+        if(this.cursors.left.isDown && this.animation == 0) {
             this.direction.x = -1
             this.rat.setFlipX(true) //rat faces left
-        } else if(this.cursors.right.isDown) {
+        } else if(this.cursors.right.isDown && this.animation == 0) {
             this.direction.x = 1
             this.rat.setFlipX(false) //rat faces right
         }
-        if(this.cursors.up.isDown) {
+        if(this.cursors.up.isDown && this.animation == 0) {
             this.direction.y = -1
-        } else if(this.cursors.down.isDown) {
+        } else if(this.cursors.down.isDown && this.animation == 0) {
             this.direction.y = 1
         }
         this.direction.normalize()
@@ -244,22 +275,49 @@ class Play extends Phaser.Scene {
 
         //respawn cheese when none left
         if (this.cheeses == 0) {
+            this.sound.play('sfx-checkpoint')
             this.respawnCheese()
         }
 
         //at certain positions, change cat movement direction
         this.cats.getChildren().forEach(cat => {
-            if (!cat.prevy) {
-                cat.prevy = cat.y //previous y-coordinate
-            }
-            if ((cat.y) % 48 == 0 && Math.floor(cat.prevy) % 48 != 32) { // y = 80 + multiple of 48 (48 pixels between walls)
+            //y = 128, 224, 320, 416, 464
+            //x = 32, 432
+            if (cat.y >= 125 && cat.y <= 131 && cat.x >= 32 - 16 && cat.x <= 32 + 16) { 
                 if (cat.x < this.game.config.width/2) {
                     this.moveCat(cat, 3) //3=right
                 } else {
                     this.moveCat(cat, 2) //2=left
                 }
             }
-            cat.prevy = cat.y
+            if (cat.y >= 221 && cat.y <= 227 && cat.x >= 432 - 16 && cat.x <= 432 + 16) { 
+                if (cat.x < this.game.config.width/2) {
+                    this.moveCat(cat, 3) //3=right
+                } else {
+                    this.moveCat(cat, 2) //2=left
+                }
+            }
+            if (cat.y >= 317 && cat.y <= 323 && cat.x >= 432 - 16 && cat.x <= 432 + 16) { 
+                if (cat.x < this.game.config.width/2) {
+                    this.moveCat(cat, 3) //3=right
+                } else {
+                    this.moveCat(cat, 2) //2=left
+                }
+            }
+            if (cat.y >= 413 && cat.y <= 419 && ((cat.x >= 432 - 16 && cat.x <= 432 + 16) || (cat.x >= 32 - 16 && cat.x <= 32 + 16))) { 
+                if (cat.x < this.game.config.width/2) {
+                    this.moveCat(cat, 3) //3=right
+                } else {
+                    this.moveCat(cat, 2) //2=left
+                }
+            }
+            if (cat.y >= 461 && cat.y <= 467 && cat.x >= 432 - 16 && cat.x <= 432 + 16) { 
+                if (cat.x < this.game.config.width/2) {
+                    this.moveCat(cat, 3) //3=right
+                } else {
+                    this.moveCat(cat, 2) //2=left
+                }
+            }
         })
 
         //game over
